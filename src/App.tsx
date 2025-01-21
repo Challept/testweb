@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Palette, ShoppingBag, Smartphone, Loader2 } from 'lucide-react';
 
 // Declare the Stripe global variable
@@ -9,14 +9,14 @@ function App() {
     name: '',
     email: '',
     age: '',
-    accessCode: ''
+    betaCode: ''
   });
 
   const [isValid, setIsValid] = useState({
     name: false,
     email: false,
     age: false,
-    accessCode: false
+    betaCode: false
   });
 
   const [status, setStatus] = useState('');
@@ -55,15 +55,15 @@ function App() {
       case 'age':
         isFieldValid = parseInt(value) >= 14 && parseInt(value) <= 50;
         break;
-      case 'accessCode':
-        isFieldValid = value === '#175617fha462462655sf';
+      case 'betaCode':
+        isFieldValid = value === 'Sse201107!';
         break;
     }
 
     setIsValid(prev => ({ ...prev, [name]: isFieldValid }));
   };
 
-  const isFormValid = isValid.accessCode && isValid.name && isValid.email && isValid.age;
+  const isFormValid = Object.values(isValid).every(Boolean);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,86 +177,82 @@ function App() {
 
           <form onSubmit={handleSubmit} className="p-8 space-y-6">
             <div>
-              <label htmlFor="accessCode" className="block text-gray-700 text-sm font-medium mb-2">
-                Åtkomstkod
+              <label htmlFor="name" className="block text-gray-700 text-sm font-medium mb-2">
+                Ditt Namn
               </label>
               <input
-                id="accessCode"
+                id="name"
                 type="text"
-                name="accessCode"
-                placeholder="Ange din åtkomstkod"
-                value={formData.accessCode}
+                name="name"
+                placeholder="Ange ditt namn"
+                value={formData.name}
                 onChange={handleInputChange}
                 className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-300 focus:ring-2 focus:ring-offset-2 ${
-                  !formData.accessCode ? 'border-gray-300' :
-                  isValid.accessCode ? 'border-emerald-500 focus:ring-emerald-500' :
+                  !formData.name ? 'border-gray-300' :
+                  isValid.name ? 'border-emerald-500 focus:ring-emerald-500' :
                   'border-red-500 focus:ring-red-500'
                 }`}
               />
             </div>
 
-            {isValid.accessCode && (
-              <>
-                <div>
-                  <label htmlFor="name" className="block text-gray-700 text-sm font-medium mb-2">
-                    Ditt Namn
-                  </label>
-                  <input
-                    id="name"
-                    type="text"
-                    name="name"
-                    placeholder="Ange ditt namn"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-300 focus:ring-2 focus:ring-offset-2 ${
-                      !formData.name ? 'border-gray-300' :
-                      isValid.name ? 'border-emerald-500 focus:ring-emerald-500' :
-                      'border-red-500 focus:ring-red-500'
-                    }`}
-                  />
-                </div>
+            <div>
+              <label htmlFor="email" className="block text-gray-700 text-sm font-medium mb-2">
+                Din E-postadress
+              </label>
+              <input
+                id="email"
+                type="email"
+                name="email"
+                placeholder="Ange din e-postadress"
+                value={formData.email}
+                onChange={handleInputChange}
+                className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-300 focus:ring-2 focus:ring-offset-2 ${
+                  !formData.email ? 'border-gray-300' :
+                  isValid.email ? 'border-emerald-500 focus:ring-emerald-500' :
+                  'border-red-500 focus:ring-red-500'
+                }`}
+              />
+            </div>
 
-                <div>
-                  <label htmlFor="email" className="block text-gray-700 text-sm font-medium mb-2">
-                    Din E-postadress
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    name="email"
-                    placeholder="Ange din e-postadress"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-300 focus:ring-2 focus:ring-offset-2 ${
-                      !formData.email ? 'border-gray-300' :
-                      isValid.email ? 'border-emerald-500 focus:ring-emerald-500' :
-                      'border-red-500 focus:ring-red-500'
-                    }`}
-                  />
-                </div>
+            <div>
+              <label htmlFor="age" className="block text-gray-700 text-sm font-medium mb-2">
+                Din Ålder (14-50 år)
+              </label>
+              <input
+                id="age"
+                type="number"
+                name="age"
+                placeholder="Ange din ålder"
+                min="14"
+                max="50"
+                value={formData.age}
+                onChange={handleInputChange}
+                className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-300 focus:ring-2 focus:ring-offset-2 ${
+                  !formData.age ? 'border-gray-300' :
+                  isValid.age ? 'border-emerald-500 focus:ring-emerald-500' :
+                  'border-red-500 focus:ring-red-500'
+                }`}
+              />
+            </div>
 
-                <div>
-                  <label htmlFor="age" className="block text-gray-700 text-sm font-medium mb-2">
-                    Din Ålder (14-50 år)
-                  </label>
-                  <input
-                    id="age"
-                    type="number"
-                    name="age"
-                    placeholder="Ange din ålder"
-                    min="14"
-                    max="50"
-                    value={formData.age}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-300 focus:ring-2 focus:ring-offset-2 ${
-                      !formData.age ? 'border-gray-300' :
-                      isValid.age ? 'border-emerald-500 focus:ring-emerald-500' :
-                      'border-red-500 focus:ring-red-500'
-                    }`}
-                  />
-                </div>
-              </>
-            )}
+            <div>
+              <label htmlFor="betaCode" className="block text-gray-700 text-sm font-medium mb-2">
+                Betakod
+              </label>
+              <input
+                id="betaCode"
+                type="password"
+                name="betaCode"
+                placeholder="Ange din betakod"
+                value={formData.betaCode}
+                onChange={handleInputChange}
+                className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-300 focus:ring-2 focus:ring-offset-2 ${
+                  !formData.betaCode ? 'border-gray-300' :
+                  isValid.betaCode ? 'border-emerald-500 focus:ring-emerald-500' :
+                  'border-red-500 focus:ring-red-500'
+                }`}
+              />
+            </div>
 
             <button
               type="submit"
