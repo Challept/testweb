@@ -68,7 +68,7 @@ function App() {
         isFieldValid = validateEmail(value);
         break;
       case 'age':
-        isFieldValid = parseInt(value) >= 14 && parseInt(value) <= 120;
+        isFieldValid = parseInt(value) >= 16 && parseInt(value) <= 120;
         break;
     }
 
@@ -234,14 +234,14 @@ function App() {
 
             <div>
               <label htmlFor="age" className="block text-gray-700 text-sm font-medium mb-2">
-                Din Ålder (minst 14)
+                Din Ålder (minst 16)
               </label>
               <input
                 id="age"
                 type="number"
                 name="age"
                 placeholder="Ange din ålder"
-                min="14"
+                min="16"
                 max="120"
                 value={formData.age}
                 onChange={handleInputChange}
