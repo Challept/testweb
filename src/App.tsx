@@ -68,7 +68,7 @@ function App() {
         isFieldValid = validateEmail(value);
         break;
       case 'age':
-        isFieldValid = parseInt(value) >= 14 && parseInt(value) <= 60;
+        isFieldValid = parseInt(value) >= 14 && parseInt(value) <= 120;
         break;
     }
 
@@ -234,7 +234,7 @@ function App() {
 
             <div>
               <label htmlFor="age" className="block text-gray-700 text-sm font-medium mb-2">
-                Din Ålder (14-60 år)
+                Din Ålder (minst 14)
               </label>
               <input
                 id="age"
@@ -242,7 +242,7 @@ function App() {
                 name="age"
                 placeholder="Ange din ålder"
                 min="14"
-                max="60"
+                max="120"
                 value={formData.age}
                 onChange={handleInputChange}
                 className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-300 focus:ring-2 focus:ring-offset-2 ${
