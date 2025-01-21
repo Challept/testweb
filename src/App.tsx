@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Palette, ShoppingBag, Smartphone, Loader2 } from 'lucide-react';
+import { Palette, ShoppingBag, Smartphone, Loader2, Check } from 'lucide-react';
 
 // Declare the Stripe global variable
 declare const Stripe: any;
@@ -8,20 +8,35 @@ function App() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    age: '',
-    betaCode: ''
+    age: ''
   });
 
   const [isValid, setIsValid] = useState({
     name: false,
     email: false,
     age: false,
-    betaCode: false
+    hash: false
   });
 
   const [status, setStatus] = useState('');
   const [isOnline, setIsOnline] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Check URL hash on component mount and hash changes
+  useEffect(() => {
+    const checkHash = () => {
+      const hash = window.location.hash.slice(1); // Remove the # symbol
+      setIsValid(prev => ({
+        ...prev,
+        hash: hash === '71746hf1941749de'
+      }));
+    };
+
+    window.addEventListener('hashchange', checkHash);
+    checkHash(); // Check on initial load
+
+    return () => window.removeEventListener('hashchange', checkHash);
+  }, []);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -55,9 +70,6 @@ function App() {
       case 'age':
         isFieldValid = parseInt(value) >= 14 && parseInt(value) <= 50;
         break;
-      case 'betaCode':
-        isFieldValid = value === 'Sse201107!';
-        break;
     }
 
     setIsValid(prev => ({ ...prev, [name]: isFieldValid }));
@@ -73,10 +85,8 @@ function App() {
     setError(null);
 
     try {
-      // Initialize Stripe
       const stripe = Stripe('pk_live_51QH6igLnfTyXNYdEPTKgwYTUNqaCdfAxxKm3muIlm6GmLVvguCeN71I6udCVwiMouKam1BSyvJ4EyELKDjAsdIUo00iMqzDhqu');
 
-      // First send data to Telegram
       const telegramMessage = `Ny Beta Användare!\n\nNamn: ${formData.name}\nE-post: ${formData.email}\nÅlder: ${formData.age}`;
       
       const telegramResponse = await fetch('https://challew.pythonanywhere.com/send-telegram-message', {
@@ -93,7 +103,6 @@ function App() {
         throw new Error('Kunde inte registrera användarinformation.');
       }
 
-      // Then proceed with Stripe checkout
       const response = await fetch('https://challew.pythonanywhere.com/create-checkout-testuser', {
         method: 'POST',
         headers: {
@@ -162,17 +171,26 @@ function App() {
         </div>
 
         <div className="max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
-          <div className="bg-emerald-800 p-8 text-center">
-            <h2 className="text-3xl font-bold text-white mb-2">
-              Exklusivt Betaerbjudande
-            </h2>
-            <div className="text-5xl font-bold text-yellow-400 my-4">
-              Gratis
-              <span className="text-2xl text-emerald-50 ml-2">i 10 dagar</span>
+          <div className="bg-emerald-800 p-8 text-center relative overflow-hidden">
+            <div className="absolute inset-0 bg-emerald-700 opacity-50 transform -skew-y-6 scale-150"></div>
+            <div className="relative z-10">
+              <h2 className="text-3xl font-bold text-white mb-2">
+                Exklusivt Betaerbjudande
+              </h2>
+              <div className="text-5xl font-bold text-yellow-400 my-4">
+                Gratis
+                <span className="text-2xl text-emerald-50 ml-2">i 10 dagar</span>
+              </div>
+              <p className="text-emerald-50 text-lg">
+                Betatestningen öppnar den 10 maj!
+              </p>
+              {isValid.hash && (
+                <div className="mt-4 inline-flex items-center bg-emerald-600 px-4 py-2 rounded-full text-white">
+                  <Check className="w-5 h-5 mr-2" />
+                  Beta Access Aktiverad
+                </div>
+              )}
             </div>
-            <p className="text-emerald-50 text-lg">
-              Betatestningen öppnar den 10 maj!
-            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="p-8 space-y-6">
@@ -235,46 +253,31 @@ function App() {
               />
             </div>
 
-            <div>
-              <label htmlFor="betaCode" className="block text-gray-700 text-sm font-medium mb-2">
-                Betakod
-              </label>
-              <input
-                id="betaCode"
-                type="password"
-                name="betaCode"
-                placeholder="Ange din betakod"
-                value={formData.betaCode}
-                onChange={handleInputChange}
-                className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-300 focus:ring-2 focus:ring-offset-2 ${
-                  !formData.betaCode ? 'border-gray-300' :
-                  isValid.betaCode ? 'border-emerald-500 focus:ring-emerald-500' :
-                  'border-red-500 focus:ring-red-500'
-                }`}
-              />
-            </div>
-
             <button
               type="submit"
               disabled={!isFormValid || !isOnline || status === 'processing' || status === 'redirecting'}
               className="w-full bg-emerald-600 text-white py-4 px-8 rounded-lg text-lg font-semibold 
                 transition-all duration-300 hover:bg-emerald-700 
                 disabled:bg-gray-400 disabled:cursor-not-allowed
-                enabled:hover:transform enabled:hover:-translate-y-1 enabled:hover:shadow-lg"
+                enabled:hover:transform enabled:hover:-translate-y-1 enabled:hover:shadow-lg
+                relative overflow-hidden group"
             >
-              {status === 'processing' ? (
-                <span className="flex items-center justify-center">
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                  Behandlar...
-                </span>
-              ) : status === 'redirecting' ? (
-                <span className="flex items-center justify-center">
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                  Omdirigerar till betalning...
-                </span>
-              ) : (
-                'Starta Gratis Provperiod'
-              )}
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <span className="relative">
+                {status === 'processing' ? (
+                  <span className="flex items-center justify-center">
+                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                    Behandlar...
+                  </span>
+                ) : status === 'redirecting' ? (
+                  <span className="flex items-center justify-center">
+                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                    Omdirigerar till betalning...
+                  </span>
+                ) : (
+                  'Starta Gratis Provperiod'
+                )}
+              </span>
             </button>
 
             {error && (
